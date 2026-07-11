@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from "typeorm";
+import { Car } from "./Car.js";
 
 export enum UserRole {
   CUSTOMER = "customer",
@@ -56,6 +58,9 @@ export class User {
 
   @Column({ type: "varchar", length: 255, nullable: true })
   googleId?: string;
+
+  @OneToMany(() => Car, (car) => car.owner)
+  cars!: Car[];
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
