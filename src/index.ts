@@ -8,6 +8,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import AuthRoutes from "./routes/AuthRoutes.js";
 import UserRoutes from './routes/UserRoutes.js';
+import BookingRoutes from './routes/BookingRoutes.js';
 
 const app = express();
 
@@ -47,10 +48,11 @@ app.get("/health", (request, response) => {
   });
 });
 
-// Auth routes
 app.use("/api/auth", AuthRoutes);
-// User routes
+
 app.use("/api/users", UserRoutes);
+
+app.use("/api/bookings", BookingRoutes);
 
 app.use(errorHandler);
 
