@@ -1,10 +1,39 @@
 import "reflect-metadata";
 import { env } from "./config/env.js";
 import { AppDataSource } from "./config/database.js";
+import { errorHandler } from "./middlewares/ErrorMiddleware.js";
 import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import AuthRoutes from "./routes/AuthRoutes.js";
 
 const app = express();
+
+// SECURITY MIDDLEWARE (runs on every request)
+
+// Helmet to sets security-related HTTP headers
+app.use(helmet());
+
+// CORS to control which domains can access the API
+app.use(
+  cors({
+    origin: env.frontendUrl,
+    credentials: true,
+  }),
+);
+
+// Rate limiting 
+const limiter = rateLimit({
+  // Allow 100 requests per 15 minutes from each IP address
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: {
+    success: false,
+    message: "Too many requests, please try again later",
+  },
+});
+app.use("/api", limiter);
 
 app.use(express.json());
 
@@ -17,9 +46,12 @@ app.get("/health", (request, response) => {
   });
 });
 
-// Mount routes
+// Auth routes
 app.use("/api/auth", AuthRoutes);
 
+app.use(errorHandler);
+
+// START SERVER
 async function bootstrap() {
   try {
     console.log(`${env.appName} is starting...`);
@@ -30,7 +62,6 @@ async function bootstrap() {
 
     app.listen(env.port, () => {
       console.log(`Server is running on http://localhost:${env.port}`);
-      console.log(`Health: http://localhost:${env.port}/health`);
     });
   } catch (error) {
     console.error("Failed to start application:", error);
