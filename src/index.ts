@@ -2,22 +2,24 @@ import "reflect-metadata";
 import { env } from "./config/env.js";
 import { AppDataSource } from "./config/database.js";
 import express from "express";
-import { timeStamp } from "console";
+import AuthRoutes from "./routes/AuthRoutes.js";
 
 const app = express();
 
 app.use(express.json());
 
-// GET Request
+// Health check
 app.get("/health", (request, response) => {
   response.json({
     status: "ok",
     message: "AutoLease API running",
-    timeStamp: new Date().toISOString(),
+    timestamp: new Date().toISOString(),
   });
 });
 
-// Start Server
+// Mount routes
+app.use("/api/auth", AuthRoutes);
+
 async function bootstrap() {
   try {
     console.log(`${env.appName} is starting...`);
@@ -28,7 +30,7 @@ async function bootstrap() {
 
     app.listen(env.port, () => {
       console.log(`Server is running on http://localhost:${env.port}`);
-      console.log(`Health is running on http://localhost:${env.port}/health`);
+      console.log(`Health: http://localhost:${env.port}/health`);
     });
   } catch (error) {
     console.error("Failed to start application:", error);
