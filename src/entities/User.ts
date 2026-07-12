@@ -7,6 +7,8 @@ import {
   OneToMany,
 } from "typeorm";
 import { Car } from "./Car.js";
+import { Booking } from "./Booking.js";
+import { Review } from "./Review.js";
 
 export enum UserRole {
   CUSTOMER = "customer",
@@ -61,6 +63,12 @@ export class User {
 
   @OneToMany(() => Car, (car) => car.owner)
   cars!: Car[];
+
+  @OneToMany(() => Booking, (booking) => booking.customer)
+  bookingsAsCustomer!: Booking[];
+
+  @OneToMany(() => Review, (review) => review.customer)
+  reviews!: Review[];
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;

@@ -6,8 +6,11 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from "typeorm";
 import { User } from "./User.js";
+import { Booking } from "./Booking.js";
+import { Review } from './Review.js';
 
 export enum EngineType {
   V4 = "v4",
@@ -90,6 +93,13 @@ export class Car {
     onDelete: "SET NULL",
     nullable: true,
   })
+
+  @OneToMany(() => Booking, (booking) => booking.car)
+  bookings!: Booking[];
+
+  @OneToMany(() => Review, (review) => review.car)
+  reviews!: Review[];
+
   // @JoinColumn tells TypeORM which column stores the foreign key
   // The foreign key column will be named "ownerId" in the cars table
   @JoinColumn({ name: "ownerId" })
