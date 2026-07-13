@@ -50,4 +50,59 @@ export const AuthController = {
       });
     }
   },
+
+  async changePassword(request: Request, response: Response) {
+    try {
+      const userId = request.user!.userId;
+      const { currentPassword, newPassword } = request.body;
+
+      await AuthService.changePassword(userId, currentPassword, newPassword);
+
+      response.status(200).json({
+        success: true,
+        message: "Password changed successfully",
+      });
+    } catch (error: any) {
+      response.status(400).json({
+        success: false,
+        message: error.message || "Failed to change password",
+      });
+    }
+  },
+
+  async forgotPassword(request: Request, response: Response) {
+    try {
+      const { email } = request.body;
+
+      await AuthService.forgotPassword(email);
+
+      response.status(200).json({
+        success: true,
+        message: "If the email exists, a reset link has been sent",
+      });
+    } catch (error: any) {
+      response.status(400).json({
+        success: false,
+        message: error.message || "Failed to process request",
+      });
+    }
+  },
+
+  async resetPassword(request: Request, response: Response) {
+    try {
+      const { token, newPassword } = request.body;
+
+      await AuthService.resetPassword(token, newPassword);
+
+      response.status(200).json({
+        success: true,
+        message: "Password reset successfully",
+      });
+    } catch (error: any) {
+      response.status(400).json({
+        success: false,
+        message: error.message || "Failed to reset password",
+      });
+    }
+  },
 };

@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import { UserRepository } from "../repositories/UserRepository.js";
 import { env } from "../config/env.js";
 import { UserRole } from "../entities/User.js";
+import { EmailService } from "./EmailService.js";
+import { generateToken } from "../utils/tokenGenerator.js";
 
 export const AuthService = {
   async register(userData: {
@@ -67,19 +69,15 @@ export const AuthService = {
   },
 
   generateAccessToken(userId: string, role: UserRole): string {
-    return jwt.sign(
-      { userId, role },
-      env.jwt.accessSecret,
-      { expiresIn: env.jwt.accessExpiration }
-    );
+    return jwt.sign({ userId, role }, env.jwt.accessSecret, {
+      expiresIn: env.jwt.accessExpiration,
+    });
   },
 
   generateRefreshToken(userId: string): string {
-    return jwt.sign(
-      { userId },
-      env.jwt.refreshSecret,
-      { expiresIn: env.jwt.refreshExpiration }
-    );
+    return jwt.sign({ userId }, env.jwt.refreshSecret, {
+      expiresIn: env.jwt.refreshExpiration,
+    });
   },
 
   async refreshAccessToken(refreshToken: string) {
@@ -106,5 +104,56 @@ export const AuthService = {
     } catch (error) {
       throw new Error("Invalid or expired refresh token");
     }
+  },
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    const user = await UserRepository.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new Error("Current password is incorrect");
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await UserRepository.changePassword(userId, hashedPassword);
+  },
+
+  async forgotPassword(email: string) {
+    const user = await UserRepository.findByEmail(email);
+
+    if (!user) {
+      return;
+    }
+
+    // Generate reset token
+    const resetToken = generateToken();
+    const tokenExpiry = new Date();
+    tokenExpiry.setMinutes(tokenExpiry.getMinutes() + 30); // 30 minutes
+
+    // Save token to user
+    await UserRepository.update(user.id, {
+      passwordResetToken: resetToken,
+      passwordResetTokenExpires: tokenExpiry,
+    } as any);
+
+    // Send email
+    await EmailService.sendPasswordResetEmail(user.email, resetToken);
+  },
+
+  async resetPassword(token: string, newPassword: string) {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
   },
 };
