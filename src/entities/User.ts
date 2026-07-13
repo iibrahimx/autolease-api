@@ -6,7 +6,6 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from "typeorm";
-import { Car } from "./Car.js";
 
 export enum UserRole {
   CUSTOMER = "customer",
@@ -31,11 +30,7 @@ export class User {
   @Column({ type: "varchar", length: 100 })
   lastName!: string;
 
-  @Column({
-    type: "enum",
-    enum: UserRole,
-    default: UserRole.CUSTOMER,
-  })
+  @Column({ type: "enum", enum: UserRole, default: UserRole.CUSTOMER })
   role!: UserRole;
 
   @Column({ type: "boolean", default: false })
@@ -59,15 +54,6 @@ export class User {
   @Column({ type: "varchar", length: 255, nullable: true })
   googleId?: string;
 
-  @OneToMany(() => Car, (car) => car.owner)
-  cars!: Car[];
-
-  @OneToMany("Booking", "customer")
-  bookingsAsCustomer!: any[];
-
-  @OneToMany("Review", "customer")
-  reviews!: any[];
-
   @Column({ type: "varchar", length: 255, nullable: true })
   emailVerificationToken?: string;
 
@@ -79,6 +65,15 @@ export class User {
 
   @Column({ type: "timestamp", nullable: true })
   passwordResetTokenExpires?: Date;
+
+  @OneToMany("Car", "owner")
+  cars!: any[];
+
+  @OneToMany("Booking", "customer")
+  bookingsAsCustomer!: any[];
+
+  @OneToMany("Review", "customer")
+  reviews!: any[];
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;

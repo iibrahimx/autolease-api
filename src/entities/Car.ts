@@ -5,11 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  JoinColumn,
   OneToMany,
+  JoinColumn,
 } from "typeorm";
-import { User } from "./User.js";
-import { Review } from './Review.js';
 
 export enum EngineType {
   V4 = "v4",
@@ -78,7 +76,6 @@ export class Car {
   @Column({ type: "text" })
   address!: string;
 
-  // GPS coordinates for map display
   @Column({ type: "decimal", precision: 10, scale: 7, nullable: true })
   latitude?: number;
 
@@ -88,21 +85,15 @@ export class Car {
   @Column({ type: "enum", enum: CarStatus, default: CarStatus.AVAILABLE })
   status!: CarStatus;
 
-  @ManyToOne(() => User, (user) => user.cars, {
-    onDelete: "SET NULL",
-    nullable: true,
-  })
+  @ManyToOne("User", "cars", { onDelete: "SET NULL", nullable: true })
+  @JoinColumn({ name: "ownerId" })
+  owner!: any;
 
   @OneToMany("Booking", "car")
   bookings!: any[];
 
   @OneToMany("Review", "car")
   reviews!: any[];
-
-  // @JoinColumn tells TypeORM which column stores the foreign key
-  // The foreign key column will be named "ownerId" in the cars table
-  @JoinColumn({ name: "ownerId" })
-  owner!: User;
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
