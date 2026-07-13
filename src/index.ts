@@ -9,6 +9,7 @@ import rateLimit from "express-rate-limit";
 import AuthRoutes from "./routes/AuthRoutes.js";
 import UserRoutes from './routes/UserRoutes.js';
 import BookingRoutes from './routes/BookingRoutes.js';
+import PaymentRoutes from './routes/PaymentRoutes.js';
 
 const app = express();
 
@@ -53,6 +54,8 @@ app.use("/api/auth", AuthRoutes);
 app.use("/api/users", UserRoutes);
 
 app.use("/api/bookings", BookingRoutes);
+
+app.use("/api/payments", PaymentRoutes);
 
 app.use(errorHandler);
 

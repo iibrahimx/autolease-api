@@ -38,6 +38,15 @@ export const env = {
     accessSecret: process.env.JWT_ACCESS_SECRET || "default-access-secret",
     refreshSecret: process.env.JWT_REFRESH_SECRET || "default-refresh-secret",
     accessExpiration: parseInt(process.env.JWT_ACCESS_EXPIRATION || "900", 10),
-    refreshExpiration: parseInt(process.env.JWT_REFRESH_EXPIRATION || "604800", 10),
+    refreshExpiration: parseInt(
+      process.env.JWT_REFRESH_EXPIRATION || "604800",
+      10,
+    ),
+  },
+
+  stripe: {
+    secretKey: process.env.STRIPE_SECRET_KEY || "",
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "",
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || "",
   },
 } as const;

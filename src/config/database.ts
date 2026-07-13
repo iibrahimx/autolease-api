@@ -2,8 +2,10 @@ import { DataSource } from "typeorm";
 import { env } from "./env.js";
 import { User } from "../entities/User.js";
 import { Car } from "../entities/Car.js";
-import { Booking } from '@/entities/Booking.js';
-import { Review } from '@/entities/Review.js';
+import { Booking } from "../entities/Booking.js";
+import { Review } from "../entities/Review.js";
+import { Wallet } from "../entities/Wallet.js";
+import { Payment } from "../entities/Payment.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -18,7 +20,7 @@ export const AppDataSource = new DataSource({
 
   logging: !env.isProduction,
 
-  entities: [User, Car, Booking, Review],
+  entities: [User, Car, Booking, Review, Payment, Wallet],
 
   migrations: ["src/database/migrations/**/*.ts"],
 
