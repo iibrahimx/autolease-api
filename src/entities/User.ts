@@ -70,6 +70,18 @@ export class User {
   @OneToMany(() => Review, (review) => review.customer)
   reviews!: Review[];
 
+  @Column({ type: "varchar", length: 255, nullable: true })
+  emailVerificationToken?: string;
+
+  @Column({ type: "timestamp", nullable: true })
+  emailVerificationTokenExpires?: Date;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  passwordResetToken?: string;
+
+  @Column({ type: "timestamp", nullable: true })
+  passwordResetTokenExpires?: Date;
+
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
 
