@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from "typeorm";
 import { User } from "./User.js";
 
@@ -33,6 +34,9 @@ export class Wallet {
   @OneToOne(() => User)
   @JoinColumn({ name: "userId" })
   user!: User;
+
+  @OneToMany("Transaction", "wallet")
+  transactions!: any[];
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;

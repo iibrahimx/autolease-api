@@ -476,5 +476,15 @@ export const swaggerDefinition = {
         },
       },
     },
+    "/api/wallet": {
+      get: {
+          tags: ["Wallet"],
+          summary: "Get wallet details",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: { description: "Wallet details with transactions" },
+          },
+      },
+    },
   },
 };

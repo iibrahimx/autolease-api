@@ -15,6 +15,7 @@ import ReviewRoutes from './routes/ReviewRoutes.js';
 import AdminRoutes from './routes/AdminRoutes.js';
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
+import WalletRoutes from './routes/WalletRoutes.js';
 
 const app = express();
 
@@ -68,7 +69,10 @@ app.use("/api/reviews", ReviewRoutes);
 
 app.use("/api/admin", AdminRoutes);
 
+app.use("/api/wallet", WalletRoutes);
+
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 app.use(errorHandler);
 

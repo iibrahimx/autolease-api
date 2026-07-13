@@ -6,6 +6,7 @@ import { Booking } from "../entities/Booking.js";
 import { Review } from "../entities/Review.js";
 import { Wallet } from "../entities/Wallet.js";
 import { Payment } from "../entities/Payment.js";
+import { Transaction } from "../entities/Transaction.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -20,7 +21,7 @@ export const AppDataSource = new DataSource({
 
   logging: !env.isProduction,
 
-  entities: [User, Car, Booking, Review, Payment, Wallet],
+  entities: [User, Car, Booking, Review, Payment, Wallet, Transaction],
 
   migrations: ["src/database/migrations/**/*.ts"],
 
