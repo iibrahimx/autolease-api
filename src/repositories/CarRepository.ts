@@ -5,6 +5,10 @@ import { Car, CarStatus } from "../entities/Car.js";
 const carRepository = () => AppDataSource.getRepository(Car);
 
 export const CarRepository = {
+  async count(): Promise<number> {
+    return carRepository().count();
+  },
+
   async findById(id: string): Promise<Car | null> {
     return carRepository().findOne({
       where: { id },

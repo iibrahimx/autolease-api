@@ -13,6 +13,8 @@ import PaymentRoutes from './routes/PaymentRoutes.js';
 import CarRoutes from './routes/CarRoutes.js';
 import ReviewRoutes from './routes/ReviewRoutes.js';
 import AdminRoutes from './routes/AdminRoutes.js';
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger.js";
 
 const app = express();
 
@@ -65,6 +67,8 @@ app.use("/api/cars", CarRoutes);
 app.use("/api/reviews", ReviewRoutes);
 
 app.use("/api/admin", AdminRoutes);
+
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(errorHandler);
 

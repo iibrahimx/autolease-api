@@ -4,10 +4,26 @@ import { Booking, BookingStatus } from "../entities/Booking.js";
 const bookingRepository = () => AppDataSource.getRepository(Booking);
 
 export const BookingRepository = {
+  async count(): Promise<number> {
+    return bookingRepository().count();
+  },
+
+  async countByStatus(status: BookingStatus): Promise<number> {
+    return bookingRepository().count({ where: { status } });
+  },
+
   async findById(id: string): Promise<Booking | null> {
     return bookingRepository().findOne({
       where: { id },
       relations: { customer: true, car: true },
+    });
+  },
+
+  async findRecent(limit: number = 10): Promise<Booking[]> {
+    return bookingRepository().find({
+      relations: { customer: true, car: true },
+      order: { createdAt: "DESC" },
+      take: limit,
     });
   },
 

@@ -9,6 +9,10 @@ const userRepository = () => AppDataSource.getRepository(User);
 // ============================================
 
 export const UserRepository = {
+  async count(): Promise<number> {
+    return userRepository().count();
+  },
+
   // Finds a single user by their UUID primary key
   async findById(id: string): Promise<User | null> {
     return userRepository().findOne({

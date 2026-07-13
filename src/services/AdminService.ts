@@ -3,19 +3,29 @@ import { CarRepository } from "../repositories/CarRepository.js";
 import { BookingRepository } from "../repositories/BookingRepository.js";
 import { CarStatus } from "../entities/Car.js";
 import { UserRole } from "../entities/User.js";
+import { BookingStatus } from "../entities/Booking.js";
 
 export const AdminService = {
   // ------------------------------------------
   // PLATFORM ANALYTICS
   // ------------------------------------------
   async getDashboardStats() {
+    const [totalUsers, totalCars, totalBookings, activeRentals] =
+      await Promise.all([
+        UserRepository.count(),
+        CarRepository.count(),
+        BookingRepository.count(),
+        BookingRepository.countByStatus(BookingStatus.ACTIVE),
+      ]);
+
+    const recentBookings = await BookingRepository.findRecent(5);
+
     return {
-      totalUsers: 0,
-      totalCars: 0,
-      totalBookings: 0,
-      activeRentals: 0,
-      totalRevenue: 0,
-      recentBookings: [],
+      totalUsers,
+      totalCars,
+      totalBookings,
+      activeRentals,
+      recentBookings,
     };
   },
 
