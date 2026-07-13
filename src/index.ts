@@ -11,6 +11,7 @@ import UserRoutes from './routes/UserRoutes.js';
 import BookingRoutes from './routes/BookingRoutes.js';
 import PaymentRoutes from './routes/PaymentRoutes.js';
 import CarRoutes from './routes/CarRoutes.js';
+import ReviewRoutes from './routes/ReviewRoutes.js';
 
 const app = express();
 
@@ -59,6 +60,8 @@ app.use("/api/bookings", BookingRoutes);
 app.use("/api/payments", PaymentRoutes);
 
 app.use("/api/cars", CarRoutes);
+
+app.use("/api/reviews", ReviewRoutes);
 
 app.use(errorHandler);
 
