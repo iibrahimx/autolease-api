@@ -5,6 +5,9 @@ import { env } from "../config/env.js";
 import { UserRole } from "../entities/User.js";
 import { EmailService } from "./EmailService.js";
 import { generateToken } from "../utils/tokenGenerator.js";
+import { OAuth2Client } from "google-auth-library";
+
+const googleClient = new OAuth2Client(env.google.clientId);
 
 export const AuthService = {
   async register(userData: {
@@ -117,7 +120,6 @@ export const AuthService = {
       throw new Error("User not found");
     }
 
-    // Verify current password
     const isPasswordValid = await bcrypt.compare(
       currentPassword,
       user.password,
@@ -126,7 +128,6 @@ export const AuthService = {
       throw new Error("Current password is incorrect");
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await UserRepository.changePassword(userId, hashedPassword);
   },
@@ -138,22 +139,84 @@ export const AuthService = {
       return;
     }
 
-    // Generate reset token
     const resetToken = generateToken();
     const tokenExpiry = new Date();
-    tokenExpiry.setMinutes(tokenExpiry.getMinutes() + 30); // 30 minutes
+    tokenExpiry.setMinutes(tokenExpiry.getMinutes() + 30);
 
-    // Save token to user
     await UserRepository.update(user.id, {
       passwordResetToken: resetToken,
       passwordResetTokenExpires: tokenExpiry,
     } as any);
 
-    // Send email
     await EmailService.sendPasswordResetEmail(user.email, resetToken);
   },
 
   async resetPassword(token: string, newPassword: string) {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+  },
+
+  // Google OAuth login method - INSIDE the AuthService object
+  async googleLogin(idToken: string) {
+    // Verify the ID token with Google
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: env.google.clientId,
+    });
+
+    // Extract user info from the verified token
+    const payload = ticket.getPayload();
+    
+    if (!payload || !payload.email) {
+      throw new Error("Invalid Google token");
+    }
+
+    const { email, given_name, family_name, sub: googleId, picture } = payload;
+
+    // Check if user already exists by Google ID
+    let user = await UserRepository.findByGoogleId(googleId);
+
+    if (!user) {
+      // Check if user exists by email
+      user = await UserRepository.findByEmail(email!);
+
+      if (user) {
+        // Link Google ID to existing account
+        await UserRepository.update(user.id, { 
+          googleId,
+          profilePicture: picture || undefined,
+        } as any);
+      } else {
+        // Create new user
+        user = await UserRepository.create({
+          email: email!,
+          password: "",
+          firstName: given_name || "",
+          lastName: family_name || "",
+          googleId,
+          profilePicture: picture || undefined,
+          isEmailVerified: true,
+          role: UserRole.CUSTOMER,
+        });
+      }
+    }
+
+    // Generate tokens
+    const accessToken = this.generateAccessToken(user.id, user.role);
+    const refreshToken = this.generateRefreshToken(user.id);
+
+    await UserRepository.saveRefreshToken(user.id, refreshToken);
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        profilePicture: user.profilePicture,
+      },
+      accessToken,
+      refreshToken,
+    };
   },
 };
