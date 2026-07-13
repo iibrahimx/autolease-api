@@ -4,9 +4,13 @@ Car Rental & Marketplace Backend API built with Node.js, TypeScript, Express, an
 
 ---
 
-## Deployment
+## 🚢 Deployment
 
-[Live API URL](https://autolease-api-n1tv.onrender.com)
+**Live API:** [https://autolease-api-n1tv.onrender.com](https://autolease-api-n1tv.onrender.com)
+
+**Health Check:** [https://autolease-api-n1tv.onrender.com/health](https://autolease-api-n1tv.onrender.com/health)
+
+Deployed on [Render](https://render.com) with PostgreSQL.
 
 ---
 
@@ -219,9 +223,7 @@ npm start
 
 Interactive Swagger documentation available at:
 
-```text
-http://localhost:3001/api/docs
-```
+**Swagger Docs:** [https://autolease-api-n1tv.onrender.com/api/docs](https://autolease-api-n1tv.onrender.com/api/docs)
 
 ---
 
