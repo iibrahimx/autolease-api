@@ -7,8 +7,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
-import { User } from "./User.js";
-import { Car } from "./Car.js";
 
 export enum BookingStatus {
   PENDING = "pending",           // Booking created, awaiting payment
@@ -46,14 +44,14 @@ export class Booking {
   status!: BookingStatus;
 
   // Many bookings can belong to one customer
-  @ManyToOne(() => User, (user) => user.bookingsAsCustomer)
+  @ManyToOne("User", "bookingsAsCustomer")
   @JoinColumn({ name: "customerId" })
-  customer!: User;
+  customer!: any;
 
   // Many bookings can belong to one car
-  @ManyToOne(() => Car, (car) => car.bookings)
+  @ManyToOne("Car", "bookings")
   @JoinColumn({ name: "carId" })
-  car!: Car;
+  car!: any;
 
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;

@@ -7,8 +7,6 @@ import {
   OneToMany,
 } from "typeorm";
 import { Car } from "./Car.js";
-import { Booking } from "./Booking.js";
-import { Review } from "./Review.js";
 
 export enum UserRole {
   CUSTOMER = "customer",
@@ -64,11 +62,11 @@ export class User {
   @OneToMany(() => Car, (car) => car.owner)
   cars!: Car[];
 
-  @OneToMany(() => Booking, (booking) => booking.customer)
-  bookingsAsCustomer!: Booking[];
+  @OneToMany("Booking", "customer")
+  bookingsAsCustomer!: any[];
 
-  @OneToMany(() => Review, (review) => review.customer)
-  reviews!: Review[];
+  @OneToMany("Review", "customer")
+  reviews!: any[];
 
   @Column({ type: "varchar", length: 255, nullable: true })
   emailVerificationToken?: string;
