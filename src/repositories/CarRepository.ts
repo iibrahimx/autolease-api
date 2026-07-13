@@ -5,7 +5,6 @@ import { Car, CarStatus } from "../entities/Car.js";
 const carRepository = () => AppDataSource.getRepository(Car);
 
 export const CarRepository = {
-  
   async findById(id: string): Promise<Car | null> {
     return carRepository().findOne({
       where: { id },
@@ -110,14 +109,17 @@ export const CarRepository = {
   // ----------------------------------------------------------
   // SEARCH CARS
   // ----------------------------------------------------------
-  async search(query: string, options: { skip: number; take: number }): Promise<{ cars: Car[]; total: number }> {
+  async search(
+    query: string,
+    options: { skip: number; take: number },
+  ): Promise<{ cars: Car[]; total: number }> {
     const queryBuilder = carRepository()
       .createQueryBuilder("car")
       .leftJoinAndSelect("car.owner", "owner")
       .where("car.status = :status", { status: CarStatus.AVAILABLE })
       .andWhere(
         "(LOWER(car.brand) LIKE LOWER(:query) OR LOWER(car.model) LIKE LOWER(:query) OR LOWER(car.description) LIKE LOWER(:query))",
-        { query: `%${query}%` }
+        { query: `%${query}%` },
       )
       .skip(options.skip)
       .take(options.take);
@@ -125,6 +127,92 @@ export const CarRepository = {
     const total = await queryBuilder.getCount();
     const cars = await queryBuilder.getMany();
 
+    return { cars, total };
+  },
+
+  // ----------------------------------------------------------
+  // BROWSE CARS
+  // ----------------------------------------------------------
+  async browseCars(options: {
+    skip: number;
+    take: number;
+    brand?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    engineType?: string;
+    fuelType?: string;
+    transmission?: string;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: "ASC" | "DESC";
+  }): Promise<{ cars: Car[]; total: number }> {
+    // Start building a query for available cars only
+    const queryBuilder = carRepository()
+      .createQueryBuilder("car")
+      .leftJoinAndSelect("car.owner", "owner")
+      .where("car.status = :status", { status: CarStatus.AVAILABLE });
+
+    // SEARCH - Look for keywords in brand, model, or description
+    if (options.search) {
+      queryBuilder.andWhere(
+        "(LOWER(car.brand) LIKE LOWER(:search) OR LOWER(car.model) LIKE LOWER(:search) OR LOWER(car.description) LIKE LOWER(:search))",
+        { search: `%${options.search}%` },
+      );
+    }
+
+    // FILTERS - Narrow down results by specific criteria
+    if (options.brand) {
+      queryBuilder.andWhere("LOWER(car.brand) = LOWER(:brand)", {
+        brand: options.brand,
+      });
+    }
+
+    if (options.engineType) {
+      queryBuilder.andWhere("car.engineType = :engineType", {
+        engineType: options.engineType,
+      });
+    }
+
+    if (options.fuelType) {
+      queryBuilder.andWhere("car.fuelType = :fuelType", {
+        fuelType: options.fuelType,
+      });
+    }
+
+    if (options.transmission) {
+      queryBuilder.andWhere("car.transmission = :transmission", {
+        transmission: options.transmission,
+      });
+    }
+
+    // Price range filter
+    if (options.minPrice !== undefined) {
+      queryBuilder.andWhere("car.dailyPrice >= :minPrice", {
+        minPrice: options.minPrice,
+      });
+    }
+
+    if (options.maxPrice !== undefined) {
+      queryBuilder.andWhere("car.dailyPrice <= :maxPrice", {
+        maxPrice: options.maxPrice,
+      });
+    }
+
+    // SORTING - Order the results
+    const sortBy = options.sortBy || "createdAt";
+    const sortOrder = options.sortOrder || "DESC";
+    queryBuilder.orderBy(`car.${sortBy}`, sortOrder);
+
+    // PAGINATION
+    const total = await queryBuilder.getCount();
+
+    // Apply skip/take for the current page
+    queryBuilder.skip(options.skip).take(options.take);
+
+    // Execute the query to get the actual data
+    const cars = await queryBuilder.getMany();
+
+    // Return both the data and the total count
     return { cars, total };
   },
 };
