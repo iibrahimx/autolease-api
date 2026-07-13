@@ -23,6 +23,18 @@ export const UserRepository = {
     });
   },
 
+  async findByEmailVerificationToken(token: string): Promise<User | null> {
+    return userRepository().findOne({
+      where: { emailVerificationToken: token },
+    });
+  },
+
+  async findByPasswordResetToken(token: string): Promise<User | null> {
+    return userRepository().findOne({
+      where: { passwordResetToken: token },
+    });
+  },
+
   // Used for Google OAuth - finds users who signed up with Google
   async findByGoogleId(googleId: string): Promise<User | null> {
     return userRepository().findOne({

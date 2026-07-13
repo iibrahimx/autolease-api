@@ -33,6 +33,19 @@ export const AuthService = {
       role: UserRole.CUSTOMER,
     });
 
+    // Generate verification token
+    const verificationToken = generateToken();
+    const tokenExpiry = new Date();
+    tokenExpiry.setHours(tokenExpiry.getHours() + 1);
+
+    await UserRepository.update(user.id, {
+      emailVerificationToken: verificationToken,
+      emailVerificationTokenExpires: tokenExpiry,
+    } as any);
+
+    // Send verification email
+    await EmailService.sendVerificationEmail(user.email, verificationToken);
+
     return user;
   },
 
@@ -69,6 +82,28 @@ export const AuthService = {
       accessToken,
       refreshToken,
     };
+  },
+
+  async verifyEmail(token: string) {
+    // We need findByEmailVerificationToken in UserRepository
+    const user = await UserRepository.findByEmailVerificationToken(token);
+
+    if (!user) {
+      throw new Error("Invalid verification token");
+    }
+
+    if (
+      user.emailVerificationTokenExpires &&
+      new Date() > user.emailVerificationTokenExpires
+    ) {
+      throw new Error("Verification token has expired");
+    }
+
+    await UserRepository.update(user.id, {
+      isEmailVerified: true,
+      emailVerificationToken: undefined,
+      emailVerificationTokenExpires: undefined,
+    } as any);
   },
 
   generateAccessToken(userId: string, role: UserRole): string {
@@ -152,7 +187,27 @@ export const AuthService = {
   },
 
   async resetPassword(token: string, newPassword: string) {
+    const user = await UserRepository.findByPasswordResetToken(token);
+
+    if (!user) {
+      throw new Error("Invalid or expired reset token");
+    }
+
+    // Check if token has expired
+    if (
+      user.passwordResetTokenExpires &&
+      new Date() > user.passwordResetTokenExpires
+    ) {
+      throw new Error("Reset token has expired");
+    }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await UserRepository.update(user.id, {
+      password: hashedPassword,
+      passwordResetToken: undefined,
+      passwordResetTokenExpires: undefined,
+    } as any);
   },
 
   // Google OAuth login method - INSIDE the AuthService object
@@ -165,7 +220,7 @@ export const AuthService = {
 
     // Extract user info from the verified token
     const payload = ticket.getPayload();
-    
+
     if (!payload || !payload.email) {
       throw new Error("Invalid Google token");
     }
@@ -181,7 +236,7 @@ export const AuthService = {
 
       if (user) {
         // Link Google ID to existing account
-        await UserRepository.update(user.id, { 
+        await UserRepository.update(user.id, {
           googleId,
           profilePicture: picture || undefined,
         } as any);
