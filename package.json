@@ -8,6 +8,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
+    "test": "jest --passWithNoTests",
+    "test:coverage": "jest --coverage --passWithNoTests",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/config/database.ts",
@@ -52,7 +54,10 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.4.2",
     "nodemon": "^3.1.14",
+    "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
