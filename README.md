@@ -102,6 +102,23 @@ Deployed on [Render](https://render.com) with PostgreSQL.
 - JWT Authentication
 - Webhook Signature Verification
 
+### Wallet & Withdrawals
+- Wallet with Pending & Available Balance
+- Transaction History
+- Withdrawal Requests with Bank Account
+- Admin Approval/Rejection with Auto-Refund
+
+### Webhooks
+- Stripe Webhook Integration
+- Payment Confirmation via Webhooks
+
+### Testing
+- 24 Unit & Integration Tests
+- Auth module tests (JWT, passwords, emails, roles)
+- Booking tests (overlap detection, status flow, pricing)
+- Wallet tests (balance management, commission)
+- API tests (response format, status codes, pagination)
+
 ---
 
 ## Project Structure
@@ -110,7 +127,7 @@ Deployed on [Render](https://render.com) with PostgreSQL.
 autolease-api
 ├──  src/
 |    ├── config/              # Configuration (database, env, Stripe, Cloudinary, email, Swagger)
-|    ├── controllers/         # API request |handlers
+|    ├── controllers/         # API request handlers
 |    ├── database/
 |    │   ├── migrations/      # Database migrations
 |    │   └── seeders/         # Database seeders
@@ -217,6 +234,32 @@ npm run build
 npm start
 ```
 
+### Testing
+
+```bash
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+---
+
+## Test Credentials
+
+Run seeders to create test accounts:
+
+```bash
+npm run seed:run
+```
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@autolease.com | admin123 |
+| Car Owner | testowner@autolease.com | owner123 |
+| Customer | testcustomer@autolease.com | customer123 |
+
 ---
 
 ## API Documentation
@@ -224,6 +267,8 @@ npm start
 Interactive Swagger documentation available at:
 
 **Swagger Docs:** [https://autolease-api-n1tv.onrender.com/api/docs](https://autolease-api-n1tv.onrender.com/api/docs)
+
+**Postman Collection:** Available in `postman_collection.json`
 
 ---
 
@@ -282,6 +327,17 @@ Interactive Swagger documentation available at:
 |--------|----------|-------------|
 | POST | `/api/payments/create` | Create payment intent |
 
+### Wallet
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/wallet` | Get wallet details & transactions |
+
+### Withdrawals
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/withdrawals` | Request withdrawal |
+| GET | `/api/withdrawals` | View withdrawal history |
+
 ### Admin
 
 | Method | Endpoint | Description |
@@ -292,6 +348,9 @@ Interactive Swagger documentation available at:
 | PATCH | `/api/admin/users/:userId/verify` | Verify vehicle owner |
 | PATCH | `/api/admin/vehicles/:carId/suspend` | Suspend vehicle |
 | PATCH | `/api/admin/vehicles/:carId/activate` | Activate vehicle |
+| GET | `/api/admin/withdrawals` | View all withdrawals |
+| PATCH | `/api/admin/withdrawals/:id/approve` | Approve withdrawal |
+| PATCH | `/api/admin/withdrawals/:id/reject` | Reject withdrawal |
 
 ---
 ## Database Schema
