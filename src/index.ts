@@ -17,6 +17,7 @@ import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
 import WalletRoutes from './routes/WalletRoutes.js';
 import WithdrawalRoutes from "./routes/WithdrawalRoutes.js";
+import WebhookRoutes from "./routes/WebhookRoutes.js";
 
 const app = express();
 
@@ -44,6 +45,8 @@ const limiter = rateLimit({
   },
 });
 app.use("/api", limiter);
+
+app.use("/api/webhooks/stripe", express.raw({ type: "application/json" }));
 
 app.use(express.json());
 
@@ -74,6 +77,8 @@ app.use("/api/wallet", WalletRoutes);
 
 app.use("/api/withdrawals", WithdrawalRoutes);
 
+app.use("/api/webhooks", WebhookRoutes);
+
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
@@ -87,6 +92,9 @@ async function bootstrap() {
 
     await AppDataSource.initialize();
     console.log("Database connected successfully!");
+
+    await AppDataSource.runMigrations();
+    console.log("Migrations completed!");
 
     app.listen(env.port, () => {
       console.log(`Server is running on http://localhost:${env.port}`);

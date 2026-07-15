@@ -3,13 +3,13 @@ import { PaymentRepository } from "../repositories/PaymentRepository.js";
 import { BookingRepository } from "../repositories/BookingRepository.js";
 import { PaymentStatus } from "../entities/Payment.js";
 import { BookingStatus } from "../entities/Booking.js";
+import { env } from "../config/env.js";
 
 // AutoLease takes 10% commission on each rental
 const COMMISSION_RATE = 0.1;
 
 export const PaymentService = {
   async createPaymentIntent(bookingId: string) {
-    // Check if Stripe is configured
     if (!stripe) {
       throw new Error("Payment service is not configured");
     }
@@ -87,5 +87,48 @@ export const PaymentService = {
     );
 
     return payment;
+  },
+
+  async handleWebhook(rawBody: Buffer, signature: string) {
+    if (!stripe) {
+      throw new Error("Stripe not configured");
+    }
+
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        rawBody,
+        signature,
+        env.stripe.webhookSecret || "whsec_test",
+      );
+    } catch (error: any) {
+      throw new Error(`Webhook signature verification failed`);
+    }
+
+    // Handle different event types from Stripe
+    switch (event.type) {
+      case "payment_intent.succeeded":
+        const paymentIntent = event.data.object;
+        await this.confirmPayment(paymentIntent.id);
+        break;
+
+      case "payment_intent.payment_failed":
+        const failedIntent = event.data.object;
+        await this.failPayment(failedIntent.id);
+        break;
+    }
+  },
+
+  async failPayment(stripePaymentIntentId: string) {
+    const payment = await PaymentRepository.findByStripeId(
+      stripePaymentIntentId,
+    );
+    if (!payment) return;
+
+    await PaymentRepository.updateStatus(payment.id, PaymentStatus.FAILED);
+    await BookingRepository.updateStatus(
+      payment.booking.id,
+      BookingStatus.PENDING,
+    );
   },
 };
