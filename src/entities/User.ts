@@ -75,6 +75,12 @@ export class User {
   @OneToMany("Review", "customer")
   reviews!: any[];
 
+  @OneToMany("BankAccount", "user")
+  bankAccounts!: any[];
+
+  @OneToMany("Withdrawal", "user")
+  withdrawals!: any[];
+
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
 

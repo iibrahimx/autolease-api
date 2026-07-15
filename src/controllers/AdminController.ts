@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AdminService } from "../services/AdminService.js";
+import { WithdrawalService } from "../services/WithdrawalService.js";
 
 export const AdminController = {
   async getDashboard(request: Request, response: Response) {
@@ -108,4 +109,54 @@ export const AdminController = {
       });
     }
   },
+
+  async approveWithdrawal(request: Request, response: Response) {
+  try {
+    const { withdrawalId } = request.params;
+    await WithdrawalService.approveWithdrawal(withdrawalId as string);
+
+    response.status(200).json({
+      success: true,
+      message: "Withdrawal approved",
+    });
+  } catch (error: any) {
+    response.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+},
+
+async rejectWithdrawal(request: Request, response: Response) {
+  try {
+    const { withdrawalId } = request.params;
+    await WithdrawalService.rejectWithdrawal(withdrawalId as string);
+
+    response.status(200).json({
+      success: true,
+      message: "Withdrawal rejected and refunded",
+    });
+  } catch (error: any) {
+    response.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+},
+
+async getAllWithdrawals(request: Request, response: Response) {
+  try {
+    const withdrawals = await WithdrawalService.getAllWithdrawals();
+
+    response.status(200).json({
+      success: true,
+      data: withdrawals,
+    });
+  } catch (error: any) {
+    response.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+},
 };
